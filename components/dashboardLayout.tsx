@@ -45,7 +45,7 @@ export const DashboardLayout = ({ children }: { children: ReactNode }) => {
       : authState?.role === 'admin'
         ? `${authState.admin?.user?.firstName || ''} ${authState.admin?.user?.lastName || ''}`.trim()
         : 'Usuario'}</p>
-          <p className="text-sm text-white/80">
+ 
    <p className="text-sm text-white/80">
   {(() => {
     switch(authState?.role) {
@@ -60,7 +60,7 @@ export const DashboardLayout = ({ children }: { children: ReactNode }) => {
     }
   })()}
 </p>
-          </p>{" "}
+         
           {/* Cambiado aquí */}
         </div>
 

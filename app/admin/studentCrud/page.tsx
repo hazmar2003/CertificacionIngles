@@ -22,9 +22,10 @@ export default function StudentCrud() {
       user: {
         firstName: 'Juan',
         lastName: 'Pérez',
-        email: 'juan.perez@example.com',
+        email: 'juan@estudiante.uci.cu',
         officialId: '03120268985',
-        password: 'Password123$'
+        password: 'Password123$',
+        confirmPassword: 'Password123$',
       },
       phoneNumber: '+5312345678',
       address: 'Calle Falsa 123',
@@ -41,11 +42,12 @@ export default function StudentCrud() {
       user: {
         firstName: 'María',
         lastName: 'Gómez',
-        email: 'maria.gomez@example.com',
+        email: 'maria@estudiante.uci.cu',
         officialId: '03120268985',
-        password: 'Password123$'
+        password: 'Password123$',
+        confirmPassword: 'Password123$',
       },
-      phoneNumber: '987654321',
+      phoneNumber: '+5312345678',
       address: 'Avenida Siempreviva 456',
       faculty: 'FTL',
       group: '302',

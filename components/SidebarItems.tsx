@@ -13,7 +13,7 @@ export const SidebarItems = () => {
     if (authState.role === 'student') {
       return [
         { name: 'Inicio', href: '/student/dashboard', iconPlaceholder: '' },
-        { name: 'Convocatorias', href: '/teacher/examSession', iconPlaceholder: '' },
+        { name: 'Convocatorias', href: '/teacher/examSessionCrud', iconPlaceholder: '' },
         { name: 'Más Estudiantes', href: '/admin/studentCrud', iconPlaceholder: '' }
       ];
     }

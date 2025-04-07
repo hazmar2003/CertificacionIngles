@@ -15,9 +15,10 @@ export default function AdminCrud() {
       user: {
         firstName: 'Carlos',
         lastName: 'Morejon',
-        email: 'carlos.admin@example.com',
+        email: 'carlos@administrador.uci.cu',
         officialId: '03120268985',
-        password: 'Password123$'
+        password: 'Password123$',
+        confirmPassword: 'Password123$'
       }
     },
     {
@@ -25,9 +26,10 @@ export default function AdminCrud() {
       user: {
         firstName: 'Ana',
         lastName: 'Garcia',
-        email: 'ana.super@example.com',
+        email: 'ana@administrador.uci.cu',
         officialId: '03120268985',
-        password: 'Password123$'
+        password: 'Password123$',
+        confirmPassword: 'Password123$'
       }
     }
   ]);

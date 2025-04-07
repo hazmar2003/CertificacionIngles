@@ -15,9 +15,10 @@ export default function TeacherCrud() {
       user: {
         firstName: 'Laura',
         lastName: 'Profesora',
-        email: 'laura.teacher@example.com',
+        email: 'laura@profesor.uci.cu',
         officialId: '03120268985',
-        password: 'Password123$'
+        password: 'Password123$',
+        confirmPassword: 'Password123$',
       }
     },
     {
@@ -25,9 +26,10 @@ export default function TeacherCrud() {
       user: {
         firstName: 'Pedro',
         lastName: 'Rodriguez',
-        email: 'pedro.teacher@example.com',
+        email: 'pedro@profesor.uci.cu',
         officialId: '03120268985',
-        password: 'Password123$'
+        password: 'Password123$',
+        confirmPassword: 'Password123$',
       }
     }
   ]);

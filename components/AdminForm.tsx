@@ -34,11 +34,11 @@ export default function AdminForm({ admin: initialAdmin, onSubmit, onCancel }: A
   
     // Validar día según el mes
     const daysInMonth = new Date(2000, month, 0).getDate(); // Usamos año 2000 (bisiesto) para cubrir febrero
-    if (day < 1 || day > daysInMonth) return `Los días deben estar entre 01 y ${daysInMonth.toString().padStart(2, '0')} para el mes ${month.toString().padStart(2, '0')}`;
+    if (day < 1 || day > daysInMonth) return `Los días (dígitos 5-6) deben estar entre 01 y ${daysInMonth.toString().padStart(2, '0')} para el mes ${month.toString().padStart(2, '0')}`;
   
-    // Validar año (00-07 o 60-99)
-    if (!((year >= 0 && year <= 7) || (year >= 60 && year <= 99))) {
-      return "Los dígitos 5-6 deben ser un año válido (00-07 o 60-99)";
+    // Validar año (00-06 o 60-99)
+    if (!((year >= 60 && year <= 99) || (year <= 6 ))) {
+      return "Los dígitos 1-2 deben ser un año válido (00-06 o 60-99)";
     }
   
     return "";

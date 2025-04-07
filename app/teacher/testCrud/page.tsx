@@ -2,32 +2,13 @@
 import { useState, useMemo, useRef } from 'react';
 import { DashboardLayout } from '@/components/dashboardLayout';
 import { useAuth } from '@/context/AuthContext';
+import { Test } from '../../../types/Test';
+import { Question } from '@/types/Question';
 
-interface Question {
-  id: string;
-  text: string;
-  options: {
-    id: string;
-    text: string;
-    isCorrect: boolean;
-  }[];
-}
-
-interface EnglishTest {
-  id: string;
-  title: string;
-  description: string;
-  testType: 'Comprehension' | 'Listening' | 'Writing';
-  audioFile?: File | string | null;
-  questions: Question[];
-  writingPrompt?: string;
-  createdBy: string;
-  createdAt: Date;
-}
 
 export default function TestCrud() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentTest, setCurrentTest] = useState<EnglishTest | null>(null);
+  const [currentTest, setCurrentTest] = useState<Test | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { authState } = useAuth();
@@ -39,7 +20,7 @@ export default function TestCrud() {
   const canEdit = isAdmin || isTeacher;
 
   // Datos de ejemplo
-  const [tests, setTests] = useState<EnglishTest[]>([
+  const [tests, setTests] = useState<Test[]>([
     {
       id: '1',
       title: 'Prueba de Comprensión Básica',
@@ -123,7 +104,7 @@ export default function TestCrud() {
     });
   }, [tests, searchTerm]);
 
-  const handleCreateOrUpdateTest = (testData: EnglishTest) => {
+  const handleCreateOrUpdateTest = (testData: Test) => {
     // Validación básica
     if (!testData.title.trim() || !testData.description.trim()) {
       alert('Por favor ingresa un título y descripción para la prueba');
@@ -167,7 +148,7 @@ export default function TestCrud() {
     setCurrentTest(null);
   };
 
-  const handleEditTest = (test: EnglishTest) => {
+  const handleEditTest = (test: Test) => {
     setCurrentTest(test);
     setIsModalOpen(true);
   };

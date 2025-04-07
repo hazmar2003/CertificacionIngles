@@ -18,16 +18,14 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const validateEmail = (email: string) => {
-    return ""
     if (!email) return "El email es obligatorio";
     if (!/^[^@]+@(estudiante|profesor|administrador)\.uci\.cu$/.test(email)) {
-      return "El email debe tener el formato username@(estudiante|profesor|administrador).uci.cu";
+      return "El email debe tener el formato username@rol.uci.cu";
     }
     return "";
   };
 
   const validatePassword = (password: string) => {
-    return ""
     if (!password) return "La contraseña es obligatoria";
     if (password.length < 8) return "La contraseña debe tener al menos 8 caracteres";
     if (!/[A-Z]/.test(password)) return "Debe contener al menos una letra mayúscula";
@@ -105,7 +103,7 @@ export default function LoginPage() {
            isAuthenticated: true,
           role: 'teacher'
         };
-        router.push('/admin/studentCrud');
+        router.push('/teacher/testCrud');
       } else if (domain.includes('administrador')) {
         userData = {
           admin: {
@@ -121,7 +119,7 @@ export default function LoginPage() {
          isAuthenticated: true,
           role: 'admin'
         };
-        router.push('/admin/dashboard');
+        router.push('/admin/studentCrud');
       } else {
         setError('El email no corresponde a ningún rol válido');
         setIsLoading(false);

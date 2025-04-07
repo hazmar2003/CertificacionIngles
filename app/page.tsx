@@ -39,15 +39,15 @@ export default function Home() {
             />
           </div>
           
-          <div className="hidden md:flex space-x-10 items-center">
+          {/* <div className="hidden md:flex space-x-10 items-center">
             <Link href="#" className="hover:text-blue-300 transition-colors font-medium text-lg">Acerca de</Link>
             <Link 
-              href="/login" 
+              href="/teacher/examSessionCrud" 
               className="bg-white/10 hover:bg-white/20 border border-white/20 px-6 py-2 rounded-full text-lg font-medium transition-all hover:shadow-lg"
             >
               Ver Convocatorias
             </Link>
-          </div>
+          </div> */}
         </nav>
       </header>
 
