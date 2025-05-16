@@ -206,7 +206,7 @@ export default function AdminForm({ admin: initialAdmin, onSubmit, onCancel }: A
                 {initialAdmin.id ? 'Nueva Contraseña' : 'Contraseña*'}
               </label>
               <input
-                type="password"
+                type="input"
                 name="password"
                 value={admin.user?.password || ''}
                 onChange={handleChange}
@@ -220,7 +220,7 @@ export default function AdminForm({ admin: initialAdmin, onSubmit, onCancel }: A
                 {initialAdmin.id ? 'Confirmar Nueva Contraseña' : 'Confirmar Contraseña*'}
               </label>
               <input
-                type="password"
+                type="input"
                 name="passwordConfirm"
                 value={passwordConfirm}
                 onChange={handlePasswordConfirmChange}

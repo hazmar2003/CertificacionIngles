@@ -3,12 +3,14 @@ import { useState, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboardLayout';
 import TeacherForm from '@/components/TeacherForm';
 import { Teacher } from '@/types/Teacher';
+import { useAuth } from '@/context/AuthContext';
 
 export default function TeacherCrud() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTeacher, setCurrentTeacher] = useState<Teacher | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const {authState}=useAuth();
   const [teachers, setTeachers] = useState<Teacher[]>([
     {
       id: '1',
@@ -85,8 +87,10 @@ export default function TeacherCrud() {
     setDeleteConfirm(null);
   };
 
+  const Container = authState?.role === "admin" ? 'div' : DashboardLayout;
+
   return (
-    <DashboardLayout>
+    <Container>
       <div className="max-w-7xl mx-auto relative">  
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Lista de Profesores</h2>
@@ -228,6 +232,6 @@ export default function TeacherCrud() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </Container>
   );
 }

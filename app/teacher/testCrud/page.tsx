@@ -5,7 +5,6 @@ import { useAuth } from '@/context/AuthContext';
 import { Test } from '../../../types/Test';
 import { Question } from '@/types/Question';
 
-
 export default function TestCrud() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTest, setCurrentTest] = useState<Test | null>(null);
@@ -19,7 +18,7 @@ export default function TestCrud() {
   const isTeacher = authState?.role === 'teacher';
   const canEdit = isAdmin || isTeacher;
 
-  // Datos de ejemplo
+  // Datos de ejemplo con fechas como strings
   const [tests, setTests] = useState<Test[]>([
     {
       id: '1',
@@ -36,53 +35,18 @@ export default function TestCrud() {
             { id: 'q1-o3', text: 'Berlin', isCorrect: false },
             { id: 'q1-o4', text: 'Madrid', isCorrect: false }
           ]
-        },
-        {
-          id: 'q2',
-          text: 'Which is a color?',
-          options: [
-            { id: 'q2-o1', text: 'Apple', isCorrect: false },
-            { id: 'q2-o2', text: 'Blue', isCorrect: true },
-            { id: 'q2-o3', text: 'Dog', isCorrect: false },
-            { id: 'q2-o4', text: 'Run', isCorrect: false }
-          ]
         }
       ],
       createdBy: 'profesor1@example.com',
-      createdAt: new Date('2023-05-15')
-    },
-    {
-      id: '2',
-      title: 'Prueba de Listening Intermedio',
-      description: 'Evaluación de comprensión auditiva',
-      testType: 'Listening',
-      audioFile: 'audio-sample.mp3',
-      questions: [
-        {
-          id: 'q1',
-          text: 'What time does the store open?',
-          options: [
-            { id: 'q1-o1', text: '8:00 AM', isCorrect: false },
-            { id: 'q1-o2', text: '9:00 AM', isCorrect: true },
-            { id: 'q1-o3', text: '10:00 AM', isCorrect: false },
-            { id: 'q1-o4', text: 'It does not say', isCorrect: false }
-          ]
-        }
-      ],
-      createdBy: 'profesor2@example.com',
-      createdAt: new Date('2023-06-20')
-    },
-    {
-      id: '3',
-      title: 'Prueba de Escritura Avanzada',
-      description: 'Evaluación de habilidades de escritura',
-      testType: 'Writing',
-      writingPrompt: 'Write a 250-word essay about your favorite holiday destination and why you recommend it.',
-      questions: [],
-      createdBy: 'profesor3@example.com',
-      createdAt: new Date('2023-07-10')
+      createdAt: '2023-05-15T00:00:00'
     }
   ]);
+
+  // Función para formatear fecha string a formato legible
+  const formatDateString = (dateString?: string) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString();
+  };
 
   // Filtrar pruebas basado en el término de búsqueda
   const filteredTests = useMemo(() => {
@@ -90,11 +54,13 @@ export default function TestCrud() {
     
     const term = searchTerm.toLowerCase();
     return tests.filter(test => {
+      const dateString = formatDateString(test.createdAt).toLowerCase();
       return (
         test.title.toLowerCase().includes(term) ||
         test.description.toLowerCase().includes(term) ||
         test.testType.toLowerCase().includes(term) ||
         test.createdBy.toLowerCase().includes(term) ||
+        dateString.includes(term) ||
         test.questions.some(q => 
           q.text.toLowerCase().includes(term) ||
           q.options.some(o => o.text.toLowerCase().includes(term))
@@ -104,43 +70,73 @@ export default function TestCrud() {
     });
   }, [tests, searchTerm]);
 
-  const handleCreateOrUpdateTest = (testData: Test) => {
-    // Validación básica
-    if (!testData.title.trim() || !testData.description.trim()) {
-      alert('Por favor ingresa un título y descripción para la prueba');
-      return;
+  const validateTest = (testData: Test): boolean => {
+    if (!testData.title.trim()) {
+      alert('Por favor ingresa un título para la prueba');
+      return false;
+    }
+
+    if (!testData.description.trim()) {
+      alert('Por favor ingresa una descripción para la prueba');
+      return false;
     }
 
     if (testData.testType === 'Writing' && !testData.writingPrompt?.trim()) {
       alert('Por favor ingresa el enunciado para la prueba de escritura');
-      return;
+      return false;
     }
 
     if (testData.testType === 'Listening' && !testData.audioFile) {
       alert('Por favor selecciona un archivo de audio para la prueba de listening');
-      return;
+      return false;
     }
 
     if ((testData.testType === 'Comprehension' || testData.testType === 'Listening') && 
         testData.questions.length < 1) {
       alert('Por favor ingresa al menos una pregunta para la prueba');
-      return;
+      return false;
     }
 
+    if (testData.testType === 'Comprehension' || testData.testType === 'Listening') {
+      for (const question of testData.questions) {
+        if (!question.text.trim()) {
+          alert(`Por favor completa el texto de la pregunta "${question.id}"`);
+          return false;
+        }
+
+        for (const option of question.options) {
+          if (!option.text.trim()) {
+            alert(`Por favor completa todas las opciones de la pregunta "${question.id}"`);
+            return false;
+          }
+        }
+
+        const correctOptions = question.options.filter(o => o.isCorrect);
+        if (correctOptions.length !== 1) {
+          alert(`Por favor selecciona exactamente una opción correcta para la pregunta "${question.id}"`);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const handleCreateOrUpdateTest = (testData: Test) => {
+    if (!validateTest(testData)) return;
+
     if (currentTest?.id) {
-      // Editar prueba existente
       setTests(tests.map(t => t.id === currentTest.id ? { 
         ...testData,
         id: currentTest.id,
         createdAt: currentTest.createdAt
       } : t));
     } else {
-      // Crear nueva prueba
       const newTest = {
         ...testData,
         id: Date.now().toString(),
         createdBy: authState?.teacher?.user?.email || 'unknown',
-        createdAt: new Date()
+        createdAt: new Date().toISOString()
       };
       setTests([...tests, newTest]);
     }
@@ -254,7 +250,6 @@ export default function TestCrud() {
       [name]: value
     });
 
-    // Si cambiamos el tipo de prueba, resetear algunas propiedades
     if (name === 'testType') {
       if (value === 'Writing') {
         setCurrentTest({
@@ -353,7 +348,7 @@ export default function TestCrud() {
                     }
                   ],
                   createdBy: authState?.teacher?.user?.email || '',
-                  createdAt: new Date()
+                  createdAt: ''
                 });
                 setIsModalOpen(true);
               }}
@@ -431,7 +426,7 @@ export default function TestCrud() {
                       {test.createdBy}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {test.createdAt.toLocaleDateString()}
+                      {formatDateString(test.createdAt)}
                     </td>
                     {canEdit && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -481,7 +476,7 @@ export default function TestCrud() {
               <div className="grid grid-cols-1 gap-6 mb-6">
                 <div>
                   <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                    Test Title *
+                    Título del Test *
                   </label>
                   <input
                     type="text"
@@ -489,14 +484,17 @@ export default function TestCrud() {
                     name="title"
                     value={currentTest.title}
                     onChange={handleTestChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className={`w-full px-3 py-2 border ${!currentTest.title.trim() ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500`}
                     required
                   />
+                  {!currentTest.title.trim() && (
+                    <p className="mt-1 text-sm text-red-600">Por favor ingresa un título</p>
+                  )}
                 </div>
 
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                    Description *
+                    Descripción *
                   </label>
                   <textarea
                     id="description"
@@ -504,14 +502,17 @@ export default function TestCrud() {
                     value={currentTest.description}
                     onChange={handleTestChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className={`w-full px-3 py-2 border ${!currentTest.description.trim() ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500`}
                     required
                   />
+                  {!currentTest.description.trim() && (
+                    <p className="mt-1 text-sm text-red-600">Por favor ingresa una descripción</p>
+                  )}
                 </div>
 
                 <div>
                   <label htmlFor="testType" className="block text-sm font-medium text-gray-700 mb-1">
-                    Test Type *
+                    Tipo de Test *
                   </label>
                   <select
                     id="testType"
@@ -521,17 +522,16 @@ export default function TestCrud() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     required
                   >
-                    <option value="Comprehension">Comprehension</option>
+                    <option value="Comprehension">Comprensión</option>
                     <option value="Listening">Listening</option>
-                    <option value="Writing">Writing</option>
+                    <option value="Writing">Escritura</option>
                   </select>
                 </div>
 
-                {/* Sección específica para Listening */}
                 {currentTest.testType === 'Listening' && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Audio Track *
+                      Archivo de Audio *
                     </label>
                     <input
                       type="file"
@@ -556,6 +556,9 @@ export default function TestCrud() {
                             : 'Ningún archivo seleccionado'}
                       </span>
                     </div>
+                    {!currentTest.audioFile && (
+                      <p className="mt-1 text-sm text-red-600">Por favor selecciona un archivo de audio</p>
+                    )}
                     {typeof currentTest.audioFile === 'string' && currentTest.audioFile && (
                       <div className="mt-2">
                         <audio controls className="w-full">
@@ -567,34 +570,35 @@ export default function TestCrud() {
                   </div>
                 )}
 
-                {/* Sección específica para Writing */}
                 {currentTest.testType === 'Writing' && (
                   <div>
                     <label htmlFor="writingPrompt" className="block text-sm font-medium text-gray-700 mb-1">
-                      Respuesta del estudiante *
+                      Enunciado de Escritura *
                     </label>
                     <textarea
                       id="writingPrompt"
                       value={currentTest.writingPrompt || ''}
                       onChange={handleWritingPromptChange}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className={`w-full px-3 py-2 border ${!currentTest.writingPrompt?.trim() ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500`}
                       required
-                      placeholder="Write here your answer"
+                      placeholder="Escribe aquí el enunciado para la prueba de escritura"
                     />
+                    {!currentTest.writingPrompt?.trim() && (
+                      <p className="mt-1 text-sm text-red-600">Por favor ingresa el enunciado</p>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Sección de preguntas (solo para Comprehension y Listening) */}
               {(currentTest.testType === 'Comprehension' || currentTest.testType === 'Listening') && (
                 <>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Questions</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Preguntas</h3>
                   
                   {currentTest.questions.map((question, qIndex) => (
                     <div key={question.id} className="mb-8 p-4 border border-gray-200 rounded-lg">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-medium text-gray-700">Question {qIndex + 1}</h4>
+                        <h4 className="font-medium text-gray-700">Pregunta {qIndex + 1}</h4>
                         {currentTest.questions.length > 1 && (
                           <button
                             onClick={() => removeQuestion(question.id)}
@@ -606,18 +610,23 @@ export default function TestCrud() {
                       </div>
                       
                       <div className="mb-4">
-
+                        <label htmlFor={`question-${question.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Texto de la Pregunta *
+                        </label>
                         <input
                           type="text"
                           id={`question-${question.id}`}
                           value={question.text}
                           onChange={(e) => handleQuestionChange(question.id, e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          className={`w-full px-3 py-2 border ${!question.text.trim() ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500`}
                           required
                         />
+                        {!question.text.trim() && (
+                          <p className="mt-1 text-sm text-red-600">Por favor escribe la pregunta</p>
+                        )}
                       </div>
 
-                      <h5 className="text-sm font-medium text-gray-700 mb-2">Options (Choose the right answer) *</h5>
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">Opciones (Selecciona la respuesta correcta) *</h5>
                       
                       {question.options.map((option, oIndex) => (
                         <div key={option.id} className="flex items-center mb-2">
@@ -628,14 +637,19 @@ export default function TestCrud() {
                             onChange={() => setCorrectAnswer(question.id, option.id)}
                             className="mr-2"
                           />
-                          <input
-                            type="text"
-                            value={option.text}
-                            onChange={(e) => handleOptionChange(question.id, option.id, e.target.value)}
-                            placeholder={`Option ${oIndex + 1}`}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                            required
-                          />
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              value={option.text}
+                              onChange={(e) => handleOptionChange(question.id, option.id, e.target.value)}
+                              placeholder={`Opción ${oIndex + 1}`}
+                              className={`w-full px-3 py-2 border ${!option.text.trim() ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                              required
+                            />
+                            {!option.text.trim() && (
+                              <p className="mt-1 text-sm text-red-600">Por favor completa esta opción</p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -670,7 +684,6 @@ export default function TestCrud() {
               </div>
             </div>
           </div>
-        
       )}
 
       {/* Modal de confirmación para eliminar */}

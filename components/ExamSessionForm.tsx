@@ -4,7 +4,6 @@ import { Test } from '../types/Test';
 import { Student } from '../types/Student';
 import { ExamSession } from '../types/ExamSession';
 
-
 interface ExamSessionFormProps {
   examSession?: ExamSession;
   tests: Test[];
@@ -12,6 +11,7 @@ interface ExamSessionFormProps {
   onSubmit: (session: ExamSession) => void;
   onCancel: () => void;
   dateError?: string | null;
+  studentError?: string | null;
 }
 
 export default function ExamSessionForm({ 
@@ -20,14 +20,15 @@ export default function ExamSessionForm({
   students, 
   onSubmit, 
   onCancel,
-  dateError
+  dateError,
+  studentError
 }: ExamSessionFormProps) {
   const [selectedTest, setSelectedTest] = useState<string>(examSession?.test?.id || '');
   const [selectedStudents, setSelectedStudents] = useState<string[]>(
     examSession?.students?.map(s => s.id!) || []
   );
   const [sessionDate, setSessionDate] = useState<string>(
-    examSession?.date ? new Date(examSession.date).toISOString().slice(0, 16) : ''
+    examSession?.date || ''
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,7 +47,7 @@ export default function ExamSessionForm({
       id: examSession?.id || Date.now().toString(),
       test: selectedTestObj,
       students: selectedStudentsObj,
-      date: new Date(sessionDate)
+      date: sessionDate // Enviamos el string directamente
     });
   };
 
@@ -115,6 +116,9 @@ export default function ExamSessionForm({
               </label>
             </div>
           ))}
+           {studentError && (
+          <p className="mt-1 text-sm text-red-600">{studentError}</p>
+        )}
         </div>
       </div>
 

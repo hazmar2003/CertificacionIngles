@@ -246,7 +246,7 @@ export default function StudentForm({ student: initialStudent, onSubmit, onCance
                 {initialStudent.id ? 'Nueva Contraseña' : 'Contraseña*'}
               </label>
               <input
-                type="password"
+                type="input"
                 name="password"
                 value={student.user?.password || ''}
                 onChange={handleChange}
@@ -260,7 +260,7 @@ export default function StudentForm({ student: initialStudent, onSubmit, onCance
                 {initialStudent.id ? 'Confirmar Nueva Contraseña' : 'Confirmar Contraseña*'}
               </label>
               <input
-                type="password"
+                type="input"
                 name="passwordConfirm"
                 value={passwordConfirm}
                 onChange={handlePasswordConfirmChange}

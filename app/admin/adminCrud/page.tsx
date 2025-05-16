@@ -3,12 +3,14 @@ import { useState, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboardLayout';
 import AdminForm from '@/components/AdminForm';
 import { Admin } from '@/types/Admin';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminCrud() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const{authState}=useAuth();
   const [admins, setAdmins] = useState<Admin[]>([
     {
       id: '1',
@@ -85,8 +87,10 @@ export default function AdminCrud() {
     setDeleteConfirm(null);
   };
 
+  const Container = authState?.role === "admin" ? 'div' : DashboardLayout;
+
   return (
-    <DashboardLayout>
+    <Container>
       <div className="max-w-7xl mx-auto relative">  
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Lista de Administradores</h2>
@@ -228,6 +232,6 @@ export default function AdminCrud() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </Container>
   );
 }

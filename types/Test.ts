@@ -9,5 +9,5 @@ import { Question } from "./Question";
   questions: Question[];
   writingPrompt?: string;
   createdBy: string;
-  createdAt: Date;
+  createdAt: string;
 }

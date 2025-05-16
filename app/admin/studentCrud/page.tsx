@@ -5,6 +5,7 @@ import StudentForm from '@/components/StudentForm';
 import { Student } from '@/types/Student';
 import { useAuth } from '@/context/AuthContext';
 
+
 export default function StudentCrud() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
@@ -14,8 +15,6 @@ export default function StudentCrud() {
   
   // Determinar permisos
   const isAdmin = authState?.role === 'admin';
-  const canView = ['admin', 'student', 'teacher'].includes(authState?.role || '');
-
   const [students, setStudents] = useState<Student[]>([
     {
       id: '1',
@@ -117,21 +116,10 @@ export default function StudentCrud() {
     setDeleteConfirm(null);
   };
 
-  if (!canView) {
-    return (
-      <DashboardLayout>
-        <div className="max-w-7xl mx-auto p-4">
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <h3 className="text-lg font-medium text-gray-900">Acceso no autorizado</h3>
-            <p className="mt-2 text-sm text-gray-500">No tienes permisos para ver esta página</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const Container = isAdmin ? 'div' : DashboardLayout;
 
   return (
-    <DashboardLayout>
+    <Container>
       <div className="max-w-7xl mx-auto relative">  
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Lista de Estudiantes</h2>
@@ -303,6 +291,6 @@ export default function StudentCrud() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </Container>
   );
 }

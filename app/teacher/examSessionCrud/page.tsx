@@ -27,7 +27,7 @@ const sampleTests: Test[] = [
       }
     ],
     createdBy: 'profesor1@example.com',
-    createdAt: new Date('2023-05-15')
+    createdAt: '2023-05-15'
   },
   {
     id: '2',
@@ -48,7 +48,7 @@ const sampleTests: Test[] = [
       }
     ],
     createdBy: 'profesor2@example.com',
-    createdAt: new Date('2023-06-20')
+    createdAt: '2023-06-20'
   },
   {
     id: '3',
@@ -58,7 +58,7 @@ const sampleTests: Test[] = [
     writingPrompt: 'Write a 250-word essay about your favorite holiday destination and why you recommend it.',
     questions: [],
     createdBy: 'profesor3@example.com',
-    createdAt: new Date('2023-07-10')
+    createdAt: '2023-07-10'
   }
 ];
 
@@ -110,15 +110,16 @@ const sampleSessions: ExamSession[] = [
     id: '1',
     test: sampleTests[0],
     students: [sampleStudents[0]],
-    date: new Date('2026-12-15T10:00:00')
+    date: '2026-12-15T10:00:00'
   },
   {
     id: '2',
     test: sampleTests[1],
     students: sampleStudents,
-    date: new Date('2026-12-20T14:30:00')
+    date: '2026-12-20T14:30:00'
   }
 ];
+
 
 export default function ExamSessionCrud() {
   const { authState } = useAuth();
@@ -130,13 +131,18 @@ export default function ExamSessionCrud() {
   const [tests] = useState<Test[]>(sampleTests);
   const [students] = useState<Student[]>(sampleStudents);
   const [dateError, setDateError] = useState<string | null>(null);
+  const [studentsError, setStudentsError] = useState<string | null>(null);
 
   const isTeacher = authState?.role === 'teacher';
 
-  const validateDate = (date: Date | undefined): boolean => {
-    if (!date) return false;
+  const validateDate = (dateString: string | undefined): boolean => {
+    if (!dateString) {
+      setDateError('La fecha es requerida');
+      return false;
+    }
     
     const now = new Date();
+    const date = new Date(dateString);
     if (date < now) {
       setDateError('La fecha y hora no pueden ser anteriores a la actual');
       return false;
@@ -150,6 +156,7 @@ export default function ExamSessionCrud() {
     
     const term = searchTerm.toLowerCase();
     return sessions.filter(session => {
+      const dateString = session.date ? new Date(session.date).toLocaleString() : '';
       return (
         session.test?.title.toLowerCase().includes(term) ||
         session.test?.testType.toLowerCase().includes(term) ||
@@ -157,25 +164,44 @@ export default function ExamSessionCrud() {
           s.user?.firstName?.toLowerCase().includes(term) ||
           s.user?.lastName?.toLowerCase().includes(term)
         ) ||
-        session.date?.toLocaleString().toLowerCase().includes(term)
+        dateString.toLowerCase().includes(term)
       );
     });
   }, [sessions, searchTerm]);
 
   const handleCreateOrUpdate = (sessionData: ExamSession) => {
+    // Validación de fecha
     if (!validateDate(sessionData.date)) {
       return;
     }
 
-    if (sessionData.id) {
-      setSessions(sessions.map(s => s.id === sessionData.id ? sessionData : s));
-    } else {
-      const newSession = {
-        ...sessionData,
-        id: Date.now().toString()
-      };
-      setSessions([...sessions, newSession]);
+    // Validación de test
+    if (!sessionData.test) {
+      alert('Por favor selecciona un test');
+      return;
     }
+
+    // Validación de estudiantes (nueva)
+    if (!sessionData.students || sessionData.students.length === 0) {
+      setStudentsError('Debe seleccionar al menos un estudiante');
+      return;
+    }
+    setStudentsError(null);
+
+    if (currentSession?.id) {
+      setSessions(sessions.map(s => s.id === currentSession.id ? sessionData : s));
+    } else {
+      const newSession: ExamSession = {
+        id: Date.now().toString(),
+        test: tests.find(t => t.id === sessionData.test?.id) || undefined,
+        students: students.filter(s => 
+          sessionData.students?.some(selected => selected.id === s.id)
+        ),
+        date: sessionData.date
+      };
+      setSessions(prev => [...prev, newSession]);
+    }
+    
     setIsModalOpen(false);
     setCurrentSession(null);
   };
@@ -183,6 +209,11 @@ export default function ExamSessionCrud() {
   const handleDelete = (id: string) => {
     setSessions(sessions.filter(s => s.id !== id));
     setDeleteConfirm(null);
+  };
+
+  const formatDateString = (dateString?: string) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleString();
   };
 
   return (
@@ -197,7 +228,7 @@ export default function ExamSessionCrud() {
                   id: '',
                   test: undefined,
                   students: [],
-                  date: undefined
+                  date: ''
                 });
                 setIsModalOpen(true);
               }}
@@ -263,7 +294,7 @@ export default function ExamSessionCrud() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {session.date?.toLocaleString()}
+                      {formatDateString(session.date)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-500">
@@ -279,7 +310,7 @@ export default function ExamSessionCrud() {
                                 ...session,
                                 test: session.test || undefined,
                                 students: session.students || [],
-                                date: session.date || undefined
+                                date: session.date || ''
                               });
                               setIsModalOpen(true);
                             }}
@@ -330,6 +361,7 @@ export default function ExamSessionCrud() {
                 onSubmit={handleCreateOrUpdate}
                 onCancel={() => setIsModalOpen(false)}
                 dateError={dateError}
+                studentError={studentsError}
               />
             </div>
           </div>

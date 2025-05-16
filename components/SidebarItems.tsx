@@ -20,17 +20,18 @@ export const SidebarItems = () => {
     
     if (authState.role === 'teacher') {
       return [
-        { name: 'Pruebas', href: '/teacher/testCrud', iconPlaceholder: '' },
-        { name: 'Convocatorias', href: '/teacher/examSessionCrud', iconPlaceholder: '' },
+        { name: 'Gestionar Pruebas', href: '/teacher/testCrud', iconPlaceholder: '' },
+        { name: 'Gestionar Convocatorias', href: '/teacher/examSessionCrud', iconPlaceholder: '' },
         { name: 'Estudiantes', href: '/admin/studentCrud', iconPlaceholder: '' }
       ];
     }
     
     if (authState.role === 'admin') {
       return [
-        { name: 'Estudiantes', href: '/admin/studentCrud', iconPlaceholder: '' },
-        { name: 'Profesores', href: '/admin/teacherCrud', iconPlaceholder: '' },
-        { name: 'Administradores', href: '/admin/adminCrud', iconPlaceholder: '' },
+        // { name: 'Estudiantes', href: '/admin/studentCrud', iconPlaceholder: '' },
+        // { name: 'Profesores', href: '/admin/teacherCrud', iconPlaceholder: '' },
+        // { name: 'Administradores', href: '/admin/adminCrud', iconPlaceholder: '' },
+        { name: 'Gestionar Usuarios', href: '/admin/userCrud', iconPlaceholder: '' },
         { name: 'Pruebas', href: '/teacher/testCrud', iconPlaceholder: '' },
         { name: 'Convocatorias', href: '/teacher/examSessionCrud', iconPlaceholder: '' }
       ];

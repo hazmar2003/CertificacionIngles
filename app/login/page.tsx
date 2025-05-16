@@ -26,14 +26,14 @@ export default function LoginPage() {
   };
 
   const validatePassword = (password: string) => {
-    if (!password) return "La contraseña es obligatoria";
-    if (password.length < 8) return "La contraseña debe tener al menos 8 caracteres";
-    if (!/[A-Z]/.test(password)) return "Debe contener al menos una letra mayúscula";
-    if (!/[a-z]/.test(password)) return "Debe contener al menos una letra minúscula";
-    if (!/[0-9]/.test(password)) return "Debe contener al menos un número";
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      return "Debe contener al menos un carácter especial (ej. !@#$%^&*)";
-    }
+    if (!password) return "La contraseña es obligatoria"; 
+    // if (password.length < 8) return "La contraseña debe tener al menos 8 caracteres";
+    // if (!/[A-Z]/.test(password)) return "Debe contener al menos una letra mayúscula";
+    // if (!/[a-z]/.test(password)) return "Debe contener al menos una letra minúscula";
+    // if (!/[0-9]/.test(password)) return "Debe contener al menos un número";
+    // if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    //   return "Debe contener al menos un carácter especial (ej. !@#$%^&*)";
+    // }
     return "";
   };
 
@@ -119,7 +119,7 @@ export default function LoginPage() {
          isAuthenticated: true,
           role: 'admin'
         };
-        router.push('/admin/studentCrud');
+        router.push('/admin/userCrud');
       } else {
         setError('El email no corresponde a ningún rol válido');
         setIsLoading(false);

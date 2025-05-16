@@ -206,7 +206,7 @@ export default function TeacherForm({ teacher: initialTeacher, onSubmit, onCance
                 {initialTeacher.id ? 'Nueva Contraseña' : 'Contraseña*'}
               </label>
               <input
-                type="password"
+                type="input"
                 name="password"
                 value={teacher.user?.password || ''}
                 onChange={handleChange}
@@ -220,7 +220,7 @@ export default function TeacherForm({ teacher: initialTeacher, onSubmit, onCance
                 {initialTeacher.id ? 'Confirmar Nueva Contraseña' : 'Confirmar Contraseña*'}
               </label>
               <input
-                type="password"
+                type="input"
                 name="passwordConfirm"
                 value={passwordConfirm}
                 onChange={handlePasswordConfirmChange}
