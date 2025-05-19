@@ -1,3 +1,4 @@
+import { ExamSession } from "./ExamSession";
 import { User } from "./User";
 
 export interface Student {
@@ -12,5 +13,5 @@ export interface Student {
     WritingLevel?: string | null;
     ListeningLevel?:string | null;
     SpeakingLevel?: string | null;
-  
+    examSessions?: ExamSession[] | null;
   }

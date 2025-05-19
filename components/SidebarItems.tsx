@@ -10,7 +10,7 @@ export const SidebarItems = () => {
   const pathname = usePathname();
   console.log(authState)
   const roleSpecificItems = () => {
-    if (authState.role === 'student') {
+    if (authState?.role === 'student') {
       return [
         { name: 'Inicio', href: '/student/dashboard', iconPlaceholder: '' },
         { name: 'Convocatorias', href: '/teacher/examSessionCrud', iconPlaceholder: '' },
@@ -18,15 +18,17 @@ export const SidebarItems = () => {
       ];
     }
     
-    if (authState.role === 'teacher') {
+    if (authState?.role === 'teacher') {
       return [
         { name: 'Gestionar Pruebas', href: '/teacher/testCrud', iconPlaceholder: '' },
+        { name: 'Revisar Pruebas', href: '/teacher/gradeWritingTestCompleted', iconPlaceholder: '' },
         { name: 'Gestionar Convocatorias', href: '/teacher/examSessionCrud', iconPlaceholder: '' },
         { name: 'Estudiantes', href: '/admin/studentCrud', iconPlaceholder: '' }
+        
       ];
     }
     
-    if (authState.role === 'admin') {
+    if (authState?.role === 'admin') {
       return [
         // { name: 'Estudiantes', href: '/admin/studentCrud', iconPlaceholder: '' },
         // { name: 'Profesores', href: '/admin/teacherCrud', iconPlaceholder: '' },

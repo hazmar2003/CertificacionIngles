@@ -12,18 +12,18 @@ export interface AuthStateType {
   teacher?: Teacher | null;
   admin?: Admin | null;
   isAuthenticated: boolean;
-  role: 'student' | 'teacher' | 'admin' | null;
+  role?: 'student' | 'teacher' | 'admin' | null;
 }
 
 interface AuthContextType {
-  authState: any,
+  authState: AuthStateType | null,
   login: (userData: AuthStateType) => void;
   logout: () => void;
 }
 
 // Crear el contexto del tipo adecuado
 const AuthStateContext = createContext<AuthContextType>({
-    authState: {},
+    authState: { isAuthenticated: false},
     login: () => {},
     logout: ()  => {},
 });

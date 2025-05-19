@@ -5,7 +5,7 @@ import { Question } from "./Question";
   title: string;
   description: string;
   testType: 'Comprehension' | 'Listening' | 'Writing';
-  audioFile?: File | string | null;
+  audioFile?: string | null;
   questions: Question[];
   writingPrompt?: string;
   createdBy: string;

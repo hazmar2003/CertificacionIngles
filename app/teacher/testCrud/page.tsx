@@ -18,7 +18,7 @@ export default function TestCrud() {
   const isTeacher = authState?.role === 'teacher';
   const canEdit = isAdmin || isTeacher;
 
-  // Datos de ejemplo con fechas como strings
+  // Datos de ejemplo con audioFile como string
   const [tests, setTests] = useState<Test[]>([
     {
       id: '1',
@@ -38,7 +38,8 @@ export default function TestCrud() {
         }
       ],
       createdBy: 'profesor1@example.com',
-      createdAt: '2023-05-15T00:00:00'
+      createdAt: '2023-05-15T00:00:00',
+      audioFile: '' // Inicializado como string vacío
     }
   ]);
 
@@ -46,6 +47,16 @@ export default function TestCrud() {
   const formatDateString = (dateString?: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString();
+  };
+
+  // Convertir File a base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
   // Filtrar pruebas basado en el término de búsqueda
@@ -256,7 +267,7 @@ export default function TestCrud() {
           ...currentTest,
           testType: 'Writing',
           questions: [],
-          audioFile: null,
+          audioFile: '',
           writingPrompt: ''
         });
       } else if (value === 'Listening') {
@@ -280,7 +291,7 @@ export default function TestCrud() {
         setCurrentTest({
           ...currentTest,
           testType: 'Comprehension',
-          audioFile: null,
+          audioFile: '',
           writingPrompt: undefined,
           questions: currentTest.questions.length > 0 ? currentTest.questions : [
             {
@@ -298,15 +309,21 @@ export default function TestCrud() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!currentTest || !e.target.files) return;
     
     const file = e.target.files[0];
     if (file) {
-      setCurrentTest({
-        ...currentTest,
-        audioFile: file
-      });
+      try {
+        const base64String = await fileToBase64(file);
+        setCurrentTest({
+          ...currentTest,
+          audioFile: base64String
+        });
+      } catch (error) {
+        console.error('Error al convertir el archivo:', error);
+        alert('Error al procesar el archivo de audio');
+      }
     }
   };
 
@@ -348,7 +365,8 @@ export default function TestCrud() {
                     }
                   ],
                   createdBy: authState?.teacher?.user?.email || '',
-                  createdAt: ''
+                  createdAt: '',
+                  audioFile: ''
                 });
                 setIsModalOpen(true);
               }}
@@ -549,17 +567,13 @@ export default function TestCrud() {
                         Seleccionar Audio
                       </button>
                       <span className="ml-3 text-sm text-gray-500">
-                        {currentTest.audioFile instanceof File 
-                          ? currentTest.audioFile.name 
-                          : typeof currentTest.audioFile === 'string' 
-                            ? currentTest.audioFile 
-                            : 'Ningún archivo seleccionado'}
+                        {currentTest.audioFile ? 'Audio seleccionado' : 'Ningún archivo seleccionado'}
                       </span>
                     </div>
                     {!currentTest.audioFile && (
                       <p className="mt-1 text-sm text-red-600">Por favor selecciona un archivo de audio</p>
                     )}
-                    {typeof currentTest.audioFile === 'string' && currentTest.audioFile && (
+                    {currentTest.audioFile && (
                       <div className="mt-2">
                         <audio controls className="w-full">
                           <source src={currentTest.audioFile} type="audio/mpeg" />

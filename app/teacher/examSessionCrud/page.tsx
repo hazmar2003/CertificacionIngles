@@ -6,6 +6,10 @@ import { useAuth } from '@/context/AuthContext';
 import { ExamSession } from '../../../types/ExamSession';
 import { Test } from '../../../types/Test';
 import { Student } from '../../../types/Student';
+import { TestCompleted } from '../../../types/TestCompleted';
+import { Answer } from '@/types/Answer';
+import { Question } from '@/types/Question';
+import { gradeTest } from '@/app/utils/gradeTest';
 
 // Datos de ejemplo para tests
 const sampleTests: Test[] = [
@@ -59,6 +63,66 @@ const sampleTests: Test[] = [
     questions: [],
     createdBy: 'profesor3@example.com',
     createdAt: '2023-07-10'
+  },
+  {
+    id: '4',
+    title: 'Advanced Reading Comprehension',
+    description: 'Assesses critical reading and detailed comprehension skills',
+    testType: 'Comprehension',
+    questions: [
+      {
+        id: 'q1',
+        text: 'According to the text, what is the main idea the author wants to convey?',
+        options: [
+          { id: 'q1-o1', text: 'The importance of early childhood education', isCorrect: true },
+          { id: 'q1-o2', text: 'The benefits of regular exercise', isCorrect: false },
+          { id: 'q1-o3', text: 'The need for more urban parks', isCorrect: false },
+          { id: 'q1-o4', text: 'The history of the industrial revolution', isCorrect: false }
+        ]
+      },
+      {
+        id: 'q2',
+        text: 'What does the phrase "the glass half full" mean in the context of the text?',
+        options: [
+          { id: 'q2-o1', text: 'Being optimistic about situations', isCorrect: true },
+          { id: 'q2-o2', text: 'Literally the amount of liquid', isCorrect: false },
+          { id: 'q2-o3', text: 'A critique of society', isCorrect: false },
+          { id: 'q2-o4', text: 'Reference to a scientific experiment', isCorrect: false }
+        ]
+      },
+      {
+        id: 'q3',
+        text: 'Which of the following statements would the author most likely agree with?',
+        options: [
+          { id: 'q3-o1', text: 'Technology should complement traditional learning methods', isCorrect: true },
+          { id: 'q3-o2', text: 'Books will become obsolete in 10 years', isCorrect: false },
+          { id: 'q3-o3', text: 'Handwriting is no longer necessary', isCorrect: false },
+          { id: 'q3-o4', text: 'Social media improves reading comprehension', isCorrect: false }
+        ]
+      },
+      {
+        id: 'q4',
+        text: 'What is the most likely reason the author mentions recent studies in paragraph 3?',
+        options: [
+          { id: 'q4-o1', text: 'To support their argument with evidence', isCorrect: true },
+          { id: 'q4-o2', text: 'To criticize current education policies', isCorrect: false },
+          { id: 'q4-o3', text: 'To introduce a new unrelated topic', isCorrect: false },
+          { id: 'q4-o4', text: 'To show the limitations of their research', isCorrect: false }
+        ]
+      },
+      {
+        id: 'q5',
+        text: 'What would be the most appropriate title for this passage?',
+        options: [
+          { id: 'q5-o1', text: 'The Cognitive Benefits of Bilingual Education', isCorrect: true },
+          { id: 'q5-o2', text: 'How to Learn a Language in 30 Days', isCorrect: false },
+          { id: 'q5-o3', text: 'The History of Language Teaching', isCorrect: false },
+          { id: 'q5-o4', text: 'Technology in Modern Classrooms', isCorrect: false }
+        ]
+      }
+    ],
+    createdBy: 'professor4@example.com',
+    createdAt: '2023-08-15'
   }
 ];
 
@@ -83,24 +147,24 @@ const sampleStudents: Student[] = [
     ListeningLevel: 'A2',
     SpeakingLevel: 'B1'
   },
-  {
-    id: '2',
+  { 
     user: {
-      firstName: 'María',
-      lastName: 'Gómez',
-      email: 'maria.gomez@example.com',
-      officialId: '987654321',
-      password: 'password123'
+      id: 1,
+      firstName: 'Ana',
+      lastName: 'Martínez',
+      officialId: '88020123456',
+      email: "ana@estudiante.uci.cu",
     },
-    phoneNumber: '+987654321',
-    address: 'Avenida Central 456',
-    faculty: 'FTL',
-    group: '302',
-    ColocationLevel: 'A2',
+    id: '101',
+    phoneNumber: '+53551234567',
+    address: 'Calle 42 #1234, Plaza',
+    faculty: 'FIO',
+    group: 'C312',
+    ColocationLevel: 'B2',
     ComprehensionLevel: 'B1',
-    WritingLevel: 'A2',
-    ListeningLevel: 'B1',
-    SpeakingLevel: 'A2'
+    WritingLevel: 'B1',
+    ListeningLevel: 'B2',
+    SpeakingLevel: 'B1'
   }
 ];
 
@@ -117,9 +181,20 @@ const sampleSessions: ExamSession[] = [
     test: sampleTests[1],
     students: sampleStudents,
     date: '2026-12-20T14:30:00'
+  },
+  {
+    id: '3',
+    test: sampleTests[2],
+    students: [sampleStudents[1]],
+    date: '2026-12-25T09:00:00'
+  },
+  {
+    id: '3',
+    test: sampleTests[3],
+    students: sampleStudents,
+    date: '2026-12-25T09:00:00'
   }
 ];
-
 
 export default function ExamSessionCrud() {
   const { authState } = useAuth();
@@ -132,9 +207,13 @@ export default function ExamSessionCrud() {
   const [students] = useState<Student[]>(sampleStudents);
   const [dateError, setDateError] = useState<string | null>(null);
   const [studentsError, setStudentsError] = useState<string | null>(null);
+  const [activeTest, setActiveTest] = useState<{session: ExamSession, test: Test} | null>(null);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [writingResponse, setWritingResponse] = useState('');
 
   const isTeacher = authState?.role === 'teacher';
-
+  const isStudent = authState?.role === 'student';
+ 
   const validateDate = (dateString: string | undefined): boolean => {
     if (!dateString) {
       setDateError('La fecha es requerida');
@@ -152,36 +231,43 @@ export default function ExamSessionCrud() {
   };
 
   const filteredSessions = useMemo(() => {
-    if (!searchTerm) return sessions;
+    let result = sessions;
     
-    const term = searchTerm.toLowerCase();
-    return sessions.filter(session => {
-      const dateString = session.date ? new Date(session.date).toLocaleString() : '';
-      return (
-        session.test?.title.toLowerCase().includes(term) ||
-        session.test?.testType.toLowerCase().includes(term) ||
-        session.students?.some(s => 
-          s.user?.firstName?.toLowerCase().includes(term) ||
-          s.user?.lastName?.toLowerCase().includes(term)
-        ) ||
-        dateString.toLowerCase().includes(term)
+    if (isStudent && authState?.student?.id) {
+      result = result.filter(session => 
+        session.students?.some(student => student.id === authState.student?.id)
       );
-    });
-  }, [sessions, searchTerm]);
+    }
+    
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(session => {
+        const dateString = session.date ? new Date(session.date).toLocaleString() : '';
+        return (
+          session.test?.title.toLowerCase().includes(term) ||
+          session.test?.testType.toLowerCase().includes(term) ||
+          session.students?.some(s => 
+            s.user?.firstName?.toLowerCase().includes(term) ||
+            s.user?.lastName?.toLowerCase().includes(term)
+          ) ||
+          dateString.toLowerCase().includes(term)
+        );
+      });
+    }
+    
+    return result;
+  }, [sessions, searchTerm, isStudent, authState?.student?.id]);
 
   const handleCreateOrUpdate = (sessionData: ExamSession) => {
-    // Validación de fecha
     if (!validateDate(sessionData.date)) {
       return;
     }
 
-    // Validación de test
     if (!sessionData.test) {
       alert('Por favor selecciona un test');
       return;
     }
 
-    // Validación de estudiantes (nueva)
     if (!sessionData.students || sessionData.students.length === 0) {
       setStudentsError('Debe seleccionar al menos un estudiante');
       return;
@@ -214,6 +300,117 @@ export default function ExamSessionCrud() {
   const formatDateString = (dateString?: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleString();
+  };
+
+  const handleStartTest = (session: ExamSession) => {
+    if (!session.test) return;
+    setActiveTest({ session, test: session.test });
+    setAnswers({});
+    setWritingResponse('');
+  };
+
+  const handleAnswerChange = (questionId: string, optionId: string) => {
+    setAnswers(prev => ({ ...prev, [questionId]: optionId }));
+  };
+
+  const handleWritingChange = (text: string) => {
+    setWritingResponse(text);
+  };
+
+  const handleSubmitTest = () => {
+    if (!activeTest || !authState?.student) return;
+  
+    const preparedAnswers: Answer[] = [];
+    
+    if (activeTest.test.testType !== 'Writing') {
+      Object.keys(answers).forEach(questionId => {
+        preparedAnswers.push({
+          questionId,
+          selectedOptionId: answers[questionId]
+        });
+      });
+    }
+  
+    const testCompleted: TestCompleted = {
+      id: `completed-${Date.now()}`,
+      test: activeTest.test,
+      examSession: activeTest.session,
+      student: authState.student,
+      answers: preparedAnswers,
+      writingResponse: activeTest.test.testType === 'Writing' ? writingResponse : undefined,
+      completedAt: new Date().toISOString(),
+      status: 'submitted'
+    };
+  
+    // Solo este bloque es nuevo ↓
+    if (activeTest.test.testType !== 'Writing') {
+      const result = gradeTest(testCompleted);
+      alert(`Prueba completada!\n\nPuntaje: ${result.score}/140\nNivel: ${result.level}\nCorrectas: ${result.correctAnswers}/${result.totalQuestions}`);
+    } else {
+      alert('Prueba de escritura enviada. El profesor la evaluará manualmente.');
+    }
+  
+    setActiveTest(null);
+  };
+
+  const renderTestContent = () => {
+    if (!activeTest) return null;
+
+    const { test } = activeTest;
+
+    return (
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold">{test.title}</h3>
+        <p className="text-gray-700">{test.description}</p>
+        
+        {test.testType === 'Listening' && test.audioFile && (
+          <div className="my-4">
+            <audio controls className="w-full">
+              <source src={test.audioFile} type="audio/mpeg" />
+              Tu navegador no soporta el elemento de audio.
+            </audio>
+          </div>
+        )}
+
+        {test.testType === 'Writing' && test.writingPrompt && (
+          <div className="space-y-4">
+            <h4 className="font-semibold">Instrucciones:</h4>
+            <p className="bg-gray-100 p-4 rounded">{test.writingPrompt}</p>
+            <textarea
+              className="w-full h-64 p-3 border rounded"
+              placeholder="Escribe tu respuesta aquí..."
+              value={writingResponse}
+              onChange={(e) => handleWritingChange(e.target.value)}
+            />
+          </div>
+        )}
+
+        {(test.testType === 'Comprehension' || test.testType === 'Listening') && (
+          <div className="space-y-6">
+            {test.questions.map((question : Question) => (
+              <div key={question.id} className="space-y-2">
+                <h4 className="font-semibold">{question.text}</h4>
+                <div className="space-y-2">
+                  {question.options.map((option: any) => (
+                    <div key={option.id} className="flex items-center">
+                      <input
+                        type="radio"
+                        id={option.id}
+                        name={question.id}
+                        checked={answers[question.id] === option.id}
+                        onChange={() => handleAnswerChange(question.id, option.id)}
+                        className="mr-2"
+                      />
+                      <label htmlFor={option.id}>{option.text}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -273,7 +470,7 @@ export default function ExamSessionCrud() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estudiantes</th>
-                  {isTeacher && (
+                  {(isTeacher || isStudent) && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   )}
                 </tr>
@@ -301,32 +498,41 @@ export default function ExamSessionCrud() {
                         {session.students?.length || 0} estudiantes
                       </div>
                     </td>
-                    {isTeacher && (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        {isTeacher ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                setCurrentSession({
+                                  ...session,
+                                  test: session.test || undefined,
+                                  students: session.students || [],
+                                  date: session.date || ''
+                                });
+                                setIsModalOpen(true);
+                              }}
+                              className="text-indigo-600 hover:text-indigo-900"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => session.id && setDeleteConfirm(session.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Eliminar
+                            </button>
+                          </>
+                        ) : isStudent && (
                           <button
-                            onClick={() => {
-                              setCurrentSession({
-                                ...session,
-                                test: session.test || undefined,
-                                students: session.students || [],
-                                date: session.date || ''
-                              });
-                              setIsModalOpen(true);
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900"
+                            onClick={() => handleStartTest(session)}
+                            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                           >
-                            Editar
+                            Realizar prueba
                           </button>
-                          <button
-                            onClick={() => session.id && setDeleteConfirm(session.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -387,6 +593,40 @@ export default function ExamSessionCrud() {
                   className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
                 >
                   Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para realizar prueba */}
+      {activeTest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b p-4 sticky top-0 bg-white z-10">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Realizando prueba: {activeTest.test.title}
+              </h3>
+              <button 
+                onClick={() => setActiveTest(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {renderTestContent()}
+              
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={handleSubmitTest}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Terminar Prueba
                 </button>
               </div>
             </div>
