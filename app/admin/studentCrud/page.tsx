@@ -168,8 +168,8 @@ export default function StudentCrud() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre y <br /> Carnet</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th> */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Facultad</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colocación</th>
@@ -193,8 +193,8 @@ export default function StudentCrud() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.user?.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.phoneNumber}</td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.user?.email}</td> */}
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.phoneNumber}</td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.faculty}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.group}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.ColocationLevel}</td>

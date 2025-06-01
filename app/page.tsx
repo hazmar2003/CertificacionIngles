@@ -39,7 +39,7 @@ export default function Home() {
             />
           </div>
           
-          <div className="hidden md:flex space-x-10 items-center">
+          {/* <div className="hidden md:flex space-x-10 items-center">
             <Link href="#" className="hover:text-blue-300 transition-colors font-medium text-lg">Acerca de</Link>
             <Link 
               href="/teacher/examSessionCrud" 
@@ -47,7 +47,7 @@ export default function Home() {
             >
               Ver Convocatorias
             </Link>
-          </div>
+          </div> */}
         </nav>
       </header>
 
